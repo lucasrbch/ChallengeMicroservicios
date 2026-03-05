@@ -11,12 +11,15 @@ import { Product } from 'src/database/entities/product.entity';
 import { errorMessages } from 'src/errors/custom';
 import { validate } from 'class-validator';
 import { successObject } from 'src/common/helper/sucess-response.interceptor';
-
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ProductActivatedEvent } from 'src/common/events/product-activated.event';
+import { ProductCreatedEvent } from 'src/common/events/product-created.event';
 @Injectable()
 export class ProductService {
   constructor(
     @InjectEntityManager()
     private readonly entityManager: EntityManager,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async getProduct(productId: number) {
@@ -40,12 +43,21 @@ export class ProductService {
 
     if (!category) throw new NotFoundException(errorMessages.category.notFound);
 
-    const product = await this.entityManager.create(Product, {
+    const product = this.entityManager.create(Product, {
+      ...data, 
       category,
       merchantId,
     });
 
-    return this.entityManager.save(product);
+    const savedProduct = await this.entityManager.save(product);
+
+    this.eventEmitter.emit(
+      'product.created',
+      new ProductCreatedEvent(savedProduct.id, savedProduct.title, savedProduct.code)
+    );
+
+    return savedProduct;
+    //return this.entityManager.save(product);
   }
 
   async addProductDetails(
@@ -68,9 +80,9 @@ export class ProductService {
     return result.raw[0];
   }
 
-  async activateProduct(productId: number, merchantId: number) {
-    if (!(await this.validate(productId)))
-      throw new ConflictException(errorMessages.product.notFulfilled);
+async activateProduct(productId: number, merchantId: number) {
+     if (!(await this.validate(productId)))
+       throw new ConflictException(errorMessages.product.notFulfilled);
 
     const result = await this.entityManager
       .createQueryBuilder()
@@ -80,10 +92,19 @@ export class ProductService {
       })
       .where('id = :id', { id: productId })
       .andWhere('merchantId = :merchantId', { merchantId })
-      .returning(['id', 'isActive'])
+      .returning(['id', 'isActive', 'title']) 
       .execute();
 
-    return result.raw[0];
+    const activatedProduct = result.raw[0];
+
+   if (activatedProduct) {
+      this.eventEmitter.emit(
+        'product.activated',
+        new ProductActivatedEvent(activatedProduct.id, activatedProduct.title)
+      );
+    }
+
+    return activatedProduct; // Retornamos lo mismo que antes
   }
 
   async validate(productId: number) {
