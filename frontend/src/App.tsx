@@ -102,11 +102,11 @@ function App() {
               border: '1px solid #ccc', 
               padding: '15px', 
               borderRadius: '8px',
-              background: p.isActive ? '#e6fffa' : '#fff'
+              background: '#0e0c0c'
             }}>
               <h3>{p.title || `ID: ${p.id} (Sin título)`}</h3>
               <p>Código: {p.code || 'N/A'}</p>
-              <p>Estado: <b>{p.isActive ? '✅ ACTIVO' : '❌ INACTIVO'}</b></p>
+              <p>Estado: <b>{p.isActive ? 'ACTIVO' : 'INACTIVO'}</b></p>
               
               {!p.isActive && (
                 <button 

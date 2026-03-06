@@ -22,6 +22,7 @@ export class ProductService {
     private eventEmitter: EventEmitter2,
   ) {}
 
+
   async getProduct(productId: number) {
     const product = await this.entityManager.findOne(Product, {
       where: {
@@ -57,30 +58,36 @@ export class ProductService {
     );
 
     return savedProduct;
-    //return this.entityManager.save(product);
   }
 
-  async addProductDetails(
-    productId: number,
-    body: ProductDetailsDto,
-    merchantId: number,
-  ) {
-    const result = await this.entityManager
-      .createQueryBuilder()
-      .update<Product>(Product)
-      .set({
-        ...body,
-      })
-      .where('id = :id', { id: productId })
-      .andWhere('merchantId = :merchantId', { merchantId })
-      .returning(['id'])
-      .execute();
-    if (result.affected < 1)
-      throw new NotFoundException(errorMessages.product.notFound);
-    return result.raw[0];
-  }
+async addProductDetails(
+  productId: number,
+  body: ProductDetailsDto,
+  merchantId: number,
+) {
+  const result = await this.entityManager
+    .createQueryBuilder()
+    .update<Product>(Product)
+    .set({
+      title: body.title,
+      code: body.code,
+      description: body.description,
+      variationType: body.variationType,
+      details: body.details, 
+      about: body.about,     
+    })
+    .where('id = :id', { id: productId })
+    .andWhere('merchantId = :merchantId', { merchantId })
+    .returning('*')
+    .execute();
 
+  if (result.affected < 1)
+    throw new NotFoundException(errorMessages.product.notFound);
+
+  return result.raw[0];
+}
 async activateProduct(productId: number, merchantId: number) {
+
      if (!(await this.validate(productId)))
        throw new ConflictException(errorMessages.product.notFulfilled);
 
@@ -134,5 +141,9 @@ async activateProduct(productId: number, merchantId: number) {
       throw new NotFoundException(errorMessages.product.notFound);
 
     return successObject;
+  }
+
+  async getAllProducts() {
+    return this.entityManager.find(Product);
   }
 }

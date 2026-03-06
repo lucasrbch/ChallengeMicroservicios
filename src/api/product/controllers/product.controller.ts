@@ -15,6 +15,11 @@ export class ProductController {
   async getProduct(@Param() product: FindOneParams) {
     return this.productService.getProduct(product.id);
   }
+  
+  @Get() 
+  async getAllProducts() {
+    return this.productService.getAllProducts();
+  }
 
   @Auth(RoleIds.Admin, RoleIds.Merchant)
   @Post('create')

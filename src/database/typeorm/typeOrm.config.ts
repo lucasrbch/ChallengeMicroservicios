@@ -13,10 +13,11 @@ export const dataSourceOptions: DataSourceOptions = {
   port: parseInt(process.env.DATABASE_PORT, 10),
   database: process.env.DATABASE_NAME,
   username: process.env.DATABASE_USER,
-  password: process.env.DATABASE_PASSWORD,
+  password: String(process.env.DATABASE_PASSWORD),
   entities: [process.env.DATABASE_ENTITIES],
   migrations: ['dist/database/migration/history/*.js'],
   logger: 'simple-console',
   synchronize: false, // never use TRUE in production!
   logging: true, // for debugging in dev Area only
+  ssl: false,
 };
