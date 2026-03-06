@@ -7,7 +7,7 @@ import { TypeOrmConfigService } from './database/typeorm/typeorm.service';
 import { ApiModule } from './api/api.module';
 import { configuration } from './config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { getEnvPath } from './common/helper/env.helper'; // Importamos tu helper
+import { getEnvPath } from './common/helper/env.helper';
 
 const envFilePath: string = getEnvPath(`${process.cwd()}/src/common/envs`);
 
@@ -15,7 +15,7 @@ const envFilePath: string = getEnvPath(`${process.cwd()}/src/common/envs`);
   imports: [
     EventEmitterModule.forRoot(),
     ConfigModule.forRoot({ 
-      envFilePath, // Usamos la ruta que tu proyecto espera
+      envFilePath, 
       load: [configuration], 
       isGlobal: true 
     }),
