@@ -28,19 +28,17 @@ function App() {
 
   useEffect(() => {
     if (!isLoggedIn) return;
-    const eventSource = new EventSource('http://localhost:3000/product/stream-events');
+    const eventSource = new EventSource(`${API_URL}/product/stream-events`);
 
     eventSource.onmessage = (event) => {
       const rawData = JSON.parse(event.data);
       const parsedData = rawData.data || rawData;
       
       if (parsedData.type === 'PRODUCT_ACTIVATED') {
-        debugger;
         addLog(`EVENT: product.activated - ID: ${parsedData.payload.productId}`);
         fetchProducts(); 
       }
       if (parsedData.type === 'PRODUCT_CREATED') {
-        debugger;
         addLog(`EVENT: product.created - ID: ${parsedData.payload.productId}`);
         fetchProducts(); 
       }
